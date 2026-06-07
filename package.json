@@ -4,7 +4,12 @@
   "description": "Exemplo de modelo com cypress e cucumber",
   "main": "index.js",
   "scripts": {
-    "test": "npx cypress run"
+    "test": "cypress run",
+    "test:open": "cypress open",
+    "test:headed": "cypress run --headed",
+    "test:tags": "cypress run --env tags",
+    "lint": "eslint cypress/",
+    "lint:fix": "eslint cypress/ --fix"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +19,8 @@
     "@badeball/cypress-cucumber-preprocessor": "^23.2.0",
     "@bahmutov/cypress-esbuild-preprocessor": "^2.2.6",
     "cypress": "^14.5.4",
-    "esbuild": "^0.25.10"
+    "esbuild": "^0.25.10",
+    "eslint": "^8.50.0",
+    "eslint-plugin-cypress": "^2.15.1"
   }
 }

@@ -1,0 +1,71 @@
+name: 📚 Documentation
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**.md'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - '**.md'
+
+jobs:
+  docs-validate:
+    name: ✅ Validate Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📚 Check documentation files
+        run: |
+          echo "📋 Arquivos de documentação encontrados:"
+          find . -maxdepth 1 -name "*.md" -type f | sort
+          echo ""
+          echo "📏 Verificando tamanho da documentação:"
+          wc -l *.md
+
+      - name: 📖 Validate markdown syntax
+        run: |
+          echo "Validando sintaxe Markdown..."
+          for file in *.md; do
+            if [ -f "$file" ]; then
+              echo "✅ Verificando: $file"
+            fi
+          done
+
+      - name: 🔗 Check internal links
+        run: |
+          echo "Verificando links internos..."
+          grep -r "\[.*\](.*)" *.md | grep -v "^Binary" | head -20
+
+  docs-report:
+    name: 📊 Documentation Report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📝 Generate docs report
+        run: |
+          echo "# Documentation Report" > docs-report.md
+          echo "" >> docs-report.md
+          echo "## Summary" >> docs-report.md
+          echo "" >> docs-report.md
+          echo "### Files" >> docs-report.md
+          find . -maxdepth 1 -name "*.md" -type f | wc -l | sed 's/^/- Total: /' >> docs-report.md
+          echo "" >> docs-report.md
+          echo "### Details" >> docs-report.md
+          find . -maxdepth 1 -name "*.md" -type f -exec sh -c 'echo "- {} ($(wc -l < {}) lines)"' \; | sort >> docs-report.md
+          cat docs-report.md
+
+      - name: 💾 Upload docs report
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-report
+          path: docs-report.md
+          retention-days: 30

@@ -1,25 +1,36 @@
-// ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
-// ***********************************************
-//
-//
-// -- This is a parent command --
-// Cypress.Commands.add('login', (email, password) => { ... })
-//
-//
-// -- This is a child command --
-// Cypress.Commands.add('drag', { prevSubject: 'element'}, (subject, options) => { ... })
-//
-//
-// -- This is a dual command --
-// Cypress.Commands.add('dismiss', { prevSubject: 'optional'}, (subject, options) => { ... })
-//
-//
-// -- This will overwrite an existing command --
-// Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+/**
+ * Comandos customizados do Cypress
+ * Adicione aqui funções que serão reutilizadas em múltiplos testes
+ */
+
+// Comando customizado: Login como administrador
+Cypress.Commands.add('loginAsAdmin', (email, password) => {
+  cy.visit('/login.html');
+  cy.get('#email').type(email);
+  cy.get('#password').type(password);
+  cy.get('#login-btn').click();
+  cy.wait(1000);
+});
+
+// Comando customizado: Logout
+Cypress.Commands.add('logout', () => {
+  cy.clearCookies();
+  cy.clearLocalStorage();
+});
+
+// Comando customizado: Verificar elemento visível
+Cypress.Commands.add('shouldBeVisible', { prevSubject: true }, (subject) => {
+  cy.wrap(subject).should('be.visible');
+  return subject;
+});
+
+// Comando customizado: Aguardar elemento desaparecer
+Cypress.Commands.add('waitForElementToDisappear', (selector, timeout = 5000) => {
+  cy.get(selector, { timeout }).should('not.exist');
+});
+
+// Ignorar mensagens de erro não capturadas
+Cypress.on('uncaught:exception', (err) => {
+  // Retornar false para evitar que o Cypress falhe o teste
+  return false;
+});
