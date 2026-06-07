@@ -7,17 +7,16 @@ Funcionalidade: Administrar livros no Hub de Leitura
 Cenário: Adicionar um novo livro
     Dado que eu estou na página de administrador de livros
     Quando eu adiciono um novo livro com os dados obrigatórios
-    Então deve aparacer uma mensagem "Livro adicionado com sucesso!"
+    Então deve aparecer uma mensagem "Livro adicionado com sucesso!"
 
 Cenário: Editar um livro existente
     Dado que eu estou na página de administrador de livros
     E existe um livro listado no catálogo
     Quando eu edito os detalhes do livro
-    Então deve aparacer uma mensagem de atualização: "Livro atualizado com sucesso!"    
+    Então deve aparecer uma mensagem de atualização: "Livro atualizado com sucesso!"
 
 Cenário: Remover um livro
     Dado que eu estou na página de administrador de livros
-    E existe um livro listado no catálogo 
+    E existe um livro listado no catálogo
     Quando eu removo o livro do catálogo
-    Então deve aparacer uma mensagem de exclusão: "Livro excluído com sucesso!"   
-
+    Então deve aparecer uma mensagem de exclusão: "Livro excluído com sucesso!"

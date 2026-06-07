@@ -1,5 +1,5 @@
 import AdminBooksPage from '../pages/AdminBooksPage';
-import { WAIT_MEDIUM } from '../config/constants';
+import { DEFAULT_TEST_BOOK } from '../config/constants';
 
 /**
  * Cria um novo livro com os dados fornecidos
@@ -19,6 +19,23 @@ export const createBook = (bookData) => {
  */
 export const searchBook = (title) => {
   AdminBooksPage.searchBook(title);
+};
+
+/**
+ * Garante que um livro exista no catálogo (cria se necessário)
+ * @param {Object} bookData - Dados do livro
+ */
+export const ensureBookInCatalog = (bookData = DEFAULT_TEST_BOOK) => {
+  AdminBooksPage.waitForBooksTable();
+
+  cy.get('#books-tbody').then(($tbody) => {
+    if (!$tbody.text().includes(bookData.title)) {
+      createBook(bookData);
+    }
+  });
+
+  searchBook(bookData.title);
+  cy.get('#books-tbody').should('contain', bookData.title);
 };
 
 /**
@@ -49,5 +66,5 @@ export const deleteBook = (bookTitle) => {
  */
 export const verifyBookExists = (bookTitle) => {
   searchBook(bookTitle);
-  cy.contains(bookTitle).should('be.visible');
+  cy.get('#books-tbody').should('contain', bookTitle);
 };

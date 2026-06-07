@@ -5,45 +5,42 @@
 Este projeto inclui 4 workflows automáticos no GitHub Actions:
 
 ### 1. **Test Workflow** (`test.yml`)
-Executa testes automaticamente em cada push e pull request.
+Executa lint e testes automaticamente em cada push e pull request.
 
 **Acionadores:**
 - Push em `main` ou `develop`
 - Pull request para `main` ou `develop`
 - Agendado diariamente às 8 da manhã UTC
 
-**O que faz:**
-- ✅ Testa com Node.js 18.x e 20.x
-- ✅ Testa em Chrome, Firefox e Edge
-- ✅ Executa linting
-- ✅ Salva screenshots em caso de falha
-- ✅ Salva vídeos de teste
+**Jobs:**
+| Job | Descrição |
+|-----|-----------|
+| `lint` | ESLint em `cypress/` |
+| `test-external` | `teste.feature` (Cucumber.io, sem servidor local) |
+| `test-admin` | Clona Hub de Leitura, sobe em `:3000` e roda `admin-livros.feature` |
+| `result` | Falha o pipeline se algum job anterior falhar |
 
-**Saída:**
+**Saída em falha:**
 ```
 Artifacts:
-├── cypress-screenshots-*
-├── cypress-videos-*
-└── Code Quality Report
+├── cypress-screenshots-external
+└── cypress-screenshots-admin
 ```
 
 ### 2. **Quality Workflow** (`quality.yml`)
-Verifica qualidade de código e segurança.
+Auditoria de dependências npm.
 
 **Acionadores:**
 - Push em `main` ou `develop`
 - Pull request para `main` ou `develop`
 
 **O que faz:**
-- 🔍 Análise de código com ESLint
-- 📊 Relatório de qualidade
-- 🔐 Auditoria de segurança
-- 📋 Lista de dependências
+- 🔐 `npm audit` (nível high)
+- 📋 Lista de dependências instaladas
 
 **Saída:**
 ```
 Artifacts:
-├── code-quality-report
 └── dependencies-list
 ```
 

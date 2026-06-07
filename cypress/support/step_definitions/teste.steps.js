@@ -1,4 +1,4 @@
-const { Given, When, Then, link } = require('@badeball/cypress-cucumber-preprocessor')
+const { Given, When, Then } = require('@badeball/cypress-cucumber-preprocessor')
 
 Given('que acesso o site do Cucumber.io', () => {
 	cy.visit('https://cucumber.io/');

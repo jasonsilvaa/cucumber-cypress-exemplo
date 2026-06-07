@@ -16,10 +16,9 @@ export const loginAsAdmin = (
 };
 
 /**
- * Realiza logout navegando para a página de login
+ * Realiza logout limpando cookies e localStorage
  */
 export const logout = () => {
-  // Implementar conforme necessário
   cy.clearCookies();
   cy.clearLocalStorage();
 };
@@ -35,5 +34,6 @@ export const loginAndNavigateToBooks = (
 ) => {
   loginAsAdmin(email, password);
   cy.visit(ADMIN_BOOKS_URL);
-  cy.wait(3000);
+  AdminBooksPage.waitForBooksTable();
+  cy.get('h1').should('contain', 'Gerenciar Livros');
 };

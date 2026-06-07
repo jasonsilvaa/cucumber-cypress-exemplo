@@ -7,10 +7,21 @@ export const ADMIN_BOOKS_URL = `${BASE_URL}/admin-books.html`;
 export const DEFAULT_ADMIN_EMAIL = Cypress.env('ADMIN_EMAIL') || 'admin@biblioteca.com';
 export const DEFAULT_ADMIN_PASSWORD = Cypress.env('ADMIN_PASSWORD') || 'admin123';
 
-// Esperas padrão (em ms)
-export const WAIT_SHORT = 500;
-export const WAIT_MEDIUM = 1000;
-export const WAIT_LONG = 3000;
+// Dados de livro para testes
+export const DEFAULT_TEST_BOOK = {
+  title: 'Livro de Teste',
+  author: 'Autor de Teste',
+  isbn: '1234567890',
+  category: 'Ficção',
+  editor: 'Editora de Teste',
+  year: '2024',
+  copies: '1',
+};
+
+export const UPDATED_TEST_BOOK = {
+  ...DEFAULT_TEST_BOOK,
+  title: 'Livro de Teste Editado',
+};
 
 // Categorias de livros
 export const BOOK_CATEGORIES = {
@@ -22,7 +33,7 @@ export const BOOK_CATEGORIES = {
 
 // Mensagens esperadas
 export const SUCCESS_MESSAGES = {
-  BOOK_CREATED: 'Livro adicionado com sucesso',
-  BOOK_UPDATED: 'Livro atualizado com sucesso',
-  BOOK_DELETED: 'Livro removido com sucesso',
+  BOOK_CREATED: 'Livro adicionado com sucesso!',
+  BOOK_UPDATED: 'Livro atualizado com sucesso!',
+  BOOK_DELETED: 'Livro excluído com sucesso!',
 };

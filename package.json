@@ -7,6 +7,8 @@
     "test": "cypress run",
     "test:open": "cypress open",
     "test:headed": "cypress run --headed",
+    "test:admin": "cypress run --spec cypress/e2e/admin-livros.feature",
+    "test:external": "cypress run --spec cypress/e2e/teste.feature",
     "test:tags": "cypress run --env tags",
     "lint": "eslint cypress/",
     "lint:fix": "eslint cypress/ --fix"
@@ -19,6 +21,7 @@
     "@badeball/cypress-cucumber-preprocessor": "^23.2.0",
     "@bahmutov/cypress-esbuild-preprocessor": "^2.2.6",
     "cypress": "^14.5.4",
+    "dotenv": "^16.4.7",
     "esbuild": "^0.25.10",
     "eslint": "^8.50.0",
     "eslint-plugin-cypress": "^2.15.1"

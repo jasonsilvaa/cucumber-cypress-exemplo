@@ -2,62 +2,18 @@ name: 🧪 Cypress Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   schedule:
-    # Executar diariamente às 8 da manhã UTC
     - cron: '0 8 * * *'
 
+env:
+  CYPRESS_BASE_URL: http://localhost:3000
+
 jobs:
-  test:
-    name: 🎯 Run Tests
-    runs-on: ubuntu-latest
-    
-    strategy:
-      fail-fast: false
-      matrix:
-        node-version: [18.x, 20.x]
-        browser: [chrome, firefox, edge]
-
-    steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
-
-      - name: 📦 Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: 📚 Install dependencies
-        run: npm ci
-
-      - name: 🔍 Run linting
-        run: npm run lint
-
-      - name: 🧪 Run Cypress tests (${{ matrix.browser }})
-        run: npm test -- --browser ${{ matrix.browser }}
-        continue-on-error: true
-
-      - name: 📸 Upload screenshots on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-screenshots-${{ matrix.node-version }}-${{ matrix.browser }}
-          path: cypress/screenshots
-          retention-days: 7
-
-      - name: 🎥 Upload videos
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-videos-${{ matrix.node-version }}-${{ matrix.browser }}
-          path: cypress/videos
-          retention-days: 7
-
-  lint-and-format:
-    name: 📝 Lint & Format Check
+  lint:
+    name: 📝 Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -68,33 +24,129 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
-          cache: 'npm'
+          cache: npm
 
       - name: 📚 Install dependencies
         run: npm ci
 
-      - name: ✅ Check linting
+      - name: ✅ Run linting
         run: npm run lint
-        continue-on-error: true
 
-  result:
-    name: 📊 Test Results Summary
+  test-external:
+    name: 🌐 Testes externos (Cucumber.io)
     runs-on: ubuntu-latest
-    needs: [test, lint-and-format]
-    if: always()
+    needs: lint
 
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: ✅ Check if tests passed
-        if: needs.test.result != 'failure' && needs.lint-and-format.result != 'failure'
-        run: |
-          echo "✅ All tests passed!"
-          exit 0
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
 
-      - name: ❌ Tests failed
-        if: needs.test.result == 'failure' || needs.lint-and-format.result == 'failure'
+      - name: 📚 Install dependencies
+        run: npm ci
+
+      - name: 🌐 Install Cypress
+        run: npx cypress install
+
+      - name: 🧪 Run external tests
+        run: npm run test:external -- --browser chrome
+
+      - name: 📸 Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots-external
+          path: cypress/screenshots
+          retention-days: 7
+
+  test-admin:
+    name: 📚 Testes admin (Hub de Leitura)
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: npm
+
+      - name: 📚 Install test dependencies
+        run: npm ci
+
+      - name: 🌐 Install Cypress
+        run: npx cypress install
+
+      - name: 📥 Clone Hub de Leitura
+        run: git clone --depth 1 https://github.com/fabioaraujoqa/hub-de-leitura.git ../hub-de-leitura
+
+      - name: 📚 Setup Hub de Leitura
+        working-directory: ../hub-de-leitura
         run: |
-          echo "❌ Some tests or lint checks failed"
+          npm ci
+          npm run db
+
+      - name: 🚀 Start server, wait and run admin tests
+        run: |
+          cd ../hub-de-leitura
+          npm start &
+          SERVER_PID=$!
+
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3000/login.html > /dev/null; then
+              echo "Hub de Leitura is ready"
+              break
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "Hub de Leitura failed to start"
+              kill "$SERVER_PID" 2>/dev/null || true
+              exit 1
+            fi
+            sleep 2
+          done
+
+          cd "$GITHUB_WORKSPACE"
+          npm run test:admin -- --browser chrome
+          TEST_EXIT=$?
+
+          kill "$SERVER_PID" 2>/dev/null || true
+          exit $TEST_EXIT
+
+      - name: 📸 Upload screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots-admin
+          path: cypress/screenshots
+          retention-days: 7
+
+  result:
+    name: 📊 Test Results Summary
+    runs-on: ubuntu-latest
+    needs: [lint, test-external, test-admin]
+    if: always()
+
+    steps:
+      - name: ✅ All checks passed
+        if: >-
+          needs.lint.result == 'success' &&
+          needs.test-external.result == 'success' &&
+          needs.test-admin.result == 'success'
+        run: echo "✅ All tests passed!"
+
+      - name: ❌ Some checks failed
+        if: >-
+          needs.lint.result != 'success' ||
+          needs.test-external.result != 'success' ||
+          needs.test-admin.result != 'success'
+        run: |
+          echo "❌ Some checks failed"
           exit 1

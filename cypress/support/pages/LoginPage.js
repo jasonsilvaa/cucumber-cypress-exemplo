@@ -5,7 +5,7 @@ class LoginPage {
     this.emailInput = '#email';
     this.passwordInput = '#password';
     this.loginButton = '#login-btn';
-    this.errorMessage = '#error-message';
+    this.errorMessage = '#error-container';
   }
 
   navigate() {
@@ -18,7 +18,7 @@ class LoginPage {
   }
 
   fillPassword(password) {
-    cy.get(this.passwordInput).clear().type(password);
+    cy.get(this.passwordInput).clear().type(password, { log: false });
     return this;
   }
 
@@ -31,7 +31,7 @@ class LoginPage {
     this.fillEmail(email);
     this.fillPassword(password);
     this.clickLoginButton();
-    cy.wait(1000); // Aguarda processamento do login
+    cy.window().its('localStorage.authToken').should('exist');
   }
 
   getErrorMessage() {

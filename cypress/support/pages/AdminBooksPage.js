@@ -1,36 +1,37 @@
-import { ADMIN_BOOKS_URL, WAIT_MEDIUM, WAIT_LONG } from '../config/constants';
+import { ADMIN_BOOKS_URL } from '../config/constants';
 
 class AdminBooksPage {
   constructor() {
-    // Botões
-    this.addBookButton = '.btn-success';
-    this.editButton = '.btn-outline-primary';
-    this.deleteButton = '.btn-outline-danger';
     this.saveButton = '#save-book-btn';
     this.confirmDeleteButton = '#confirm-delete-btn';
-
-    // Formulário
     this.titleInput = '#book-title';
     this.authorInput = '#book-author';
     this.isbnInput = '#book-isbn';
     this.categorySelect = '#book-category';
     this.editorInput = '#book-editor';
     this.yearInput = '#book-year';
-
-    // Busca
+    this.copiesInput = '#book-copies';
     this.searchInput = '#search-input';
-
-    // Mensagens
+    this.booksTableBody = '#books-tbody';
+    this.booksLoading = '#books-loading';
     this.alertContainer = '#alert-container';
+    this.bookModal = '#bookModal';
   }
 
   navigate() {
     cy.visit(ADMIN_BOOKS_URL);
-    cy.wait(WAIT_LONG); // Aguarda carregamento completo
+    this.waitForBooksTable();
+  }
+
+  waitForBooksTable() {
+    cy.get(this.booksLoading, { timeout: 15000 }).should('not.be.visible');
+    cy.get(this.booksTableBody).should('be.visible');
+    return this;
   }
 
   clickAddBook() {
-    cy.get(this.addBookButton).click({ force: true });
+    cy.contains('button', 'Novo Livro').click();
+    cy.get(this.bookModal).should('be.visible');
     return this;
   }
 
@@ -85,57 +86,82 @@ class AdminBooksPage {
   }
 
   clearAndFillYear(year) {
-    cy.get(this.yearInput).clear().type(year);
+    cy.get(this.yearInput).clear().type(String(year));
+    return this;
+  }
+
+  fillCopies(copies) {
+    cy.get(this.copiesInput).clear().type(String(copies));
     return this;
   }
 
   fillBookForm(bookData) {
     this.fillTitle(bookData.title);
     this.fillAuthor(bookData.author);
-    this.fillISBN(bookData.isbn);
+    if (bookData.isbn) {
+      this.fillISBN(bookData.isbn);
+    }
     this.selectCategory(bookData.category);
-    this.fillEditor(bookData.editor);
-    this.fillYear(bookData.year);
+    if (bookData.editor) {
+      this.fillEditor(bookData.editor);
+    }
+    if (bookData.year) {
+      this.fillYear(bookData.year);
+    }
+    this.fillCopies(bookData.copies || '1');
     return this;
   }
 
   updateBookForm(bookData) {
     this.clearAndFillTitle(bookData.title);
     this.clearAndFillAuthor(bookData.author);
-    this.clearAndFillISBN(bookData.isbn);
+    if (bookData.isbn) {
+      this.clearAndFillISBN(bookData.isbn);
+    }
     this.selectCategory(bookData.category);
-    this.clearAndFillEditor(bookData.editor);
-    this.clearAndFillYear(bookData.year);
+    if (bookData.editor) {
+      this.clearAndFillEditor(bookData.editor);
+    }
+    if (bookData.year) {
+      this.clearAndFillYear(bookData.year);
+    }
+    if (bookData.copies) {
+      this.fillCopies(bookData.copies);
+    }
     return this;
   }
 
   clickSaveBook() {
     cy.get(this.saveButton).click();
-    cy.wait(WAIT_MEDIUM);
+    cy.get(this.bookModal).should('not.be.visible');
     return this;
   }
 
   searchBook(bookTitle) {
     cy.get(this.searchInput).clear().type(bookTitle);
-    cy.wait(WAIT_MEDIUM);
+    cy.get(this.booksTableBody, { timeout: 10000 }).should('contain', bookTitle);
     return this;
   }
 
   clickEditButton(index = 0) {
-    cy.get(this.editButton).eq(index).click({ force: true });
-    cy.wait(WAIT_MEDIUM);
+    cy.get(this.booksTableBody)
+      .find('button[title="Editar"]')
+      .eq(index)
+      .click();
+    cy.get(this.bookModal).should('be.visible');
     return this;
   }
 
   clickDeleteButton(index = 0) {
-    cy.get(this.deleteButton).eq(index).click({ force: true });
-    cy.wait(WAIT_MEDIUM);
+    cy.get(this.booksTableBody)
+      .find('button[title="Excluir"]')
+      .eq(index)
+      .click();
     return this;
   }
 
   confirmDelete() {
-    cy.get(this.confirmDeleteButton).click({ force: true });
-    cy.wait(WAIT_LONG);
+    cy.get(this.confirmDeleteButton).click();
     return this;
   }
 
@@ -144,7 +170,7 @@ class AdminBooksPage {
   }
 
   verifyAlertMessage(expectedMessage) {
-    cy.get(this.alertContainer).should('contain', expectedMessage);
+    cy.get(this.alertContainer).should('be.visible').and('contain', expectedMessage);
     return this;
   }
 }

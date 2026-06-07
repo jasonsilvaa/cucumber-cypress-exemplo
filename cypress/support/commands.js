@@ -7,9 +7,9 @@
 Cypress.Commands.add('loginAsAdmin', (email, password) => {
   cy.visit('/login.html');
   cy.get('#email').type(email);
-  cy.get('#password').type(password);
+  cy.get('#password').type(password, { log: false });
   cy.get('#login-btn').click();
-  cy.wait(1000);
+  cy.window().its('localStorage.authToken').should('exist');
 });
 
 // Comando customizado: Logout
@@ -30,7 +30,4 @@ Cypress.Commands.add('waitForElementToDisappear', (selector, timeout = 5000) => 
 });
 
 // Ignorar mensagens de erro não capturadas
-Cypress.on('uncaught:exception', (err) => {
-  // Retornar false para evitar que o Cypress falhe o teste
-  return false;
-});
+Cypress.on('uncaught:exception', () => false);

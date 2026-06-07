@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: write
+
 jobs:
   create-release:
     name: 📦 Create Release
@@ -14,34 +17,18 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: 📝 Get changelog entry
-        id: changelog
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Criando release para versão: $VERSION"
-
       - name: 🏷️ Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
+          generate_release_notes: true
           body: |
-            Confira o arquivo [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/${{ github.ref }}/CHANGELOG.md) para detalhes desta versão.
-          draft: false
-          prerelease: false
+            Confira o [CHANGELOG.md](./CHANGELOG.md) para detalhes desta versão.
 
-      - name: 📊 Generate release notes
+      - name: 📊 Generate release notes artifact
         run: |
-          echo "# Release ${{ steps.changelog.outputs.version }}" > release-notes.md
+          echo "# Release ${GITHUB_REF_NAME}" > release-notes.md
           echo "" >> release-notes.md
           echo "Released on: $(date -u +'%Y-%m-%d %H:%M:%S UTC')" >> release-notes.md
-          echo "" >> release-notes.md
-          echo "## What's New" >> release-notes.md
-          echo "" >> release-notes.md
-          echo "See [CHANGELOG.md](./CHANGELOG.md) for details." >> release-notes.md
 
       - name: 💾 Upload release notes
         uses: actions/upload-artifact@v4
