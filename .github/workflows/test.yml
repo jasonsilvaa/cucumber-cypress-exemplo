@@ -114,7 +114,7 @@ jobs:
           done
 
           cd "$GITHUB_WORKSPACE"
-          npm run test:admin -- --browser chrome
+          npm run test:hub -- --browser chrome
           TEST_EXIT=$?
 
           kill "$SERVER_PID" 2>/dev/null || true

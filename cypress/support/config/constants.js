@@ -1,11 +1,17 @@
 // URLs da aplicação
 export const BASE_URL = Cypress.env('BASE_URL') || 'http://localhost:3000';
 export const LOGIN_URL = `${BASE_URL}/login.html`;
+export const ADMIN_DASHBOARD_URL = `${BASE_URL}/admin-dashboard.html`;
 export const ADMIN_BOOKS_URL = `${BASE_URL}/admin-books.html`;
 
 // Credenciais padrão
 export const DEFAULT_ADMIN_EMAIL = Cypress.env('ADMIN_EMAIL') || 'admin@biblioteca.com';
 export const DEFAULT_ADMIN_PASSWORD = Cypress.env('ADMIN_PASSWORD') || 'admin123';
+
+export const INVALID_CREDENTIALS = {
+  email: 'invalido@teste.com',
+  password: 'senhaerrada',
+};
 
 // Dados de livro para testes
 export const DEFAULT_TEST_BOOK = {
@@ -33,7 +39,12 @@ export const BOOK_CATEGORIES = {
 
 // Mensagens esperadas
 export const SUCCESS_MESSAGES = {
+  LOGIN: 'Login realizado com sucesso!',
   BOOK_CREATED: 'Livro adicionado com sucesso!',
   BOOK_UPDATED: 'Livro atualizado com sucesso!',
   BOOK_DELETED: 'Livro excluído com sucesso!',
+};
+
+export const ERROR_MESSAGES = {
+  INVALID_LOGIN: 'Email ou senha incorretos',
 };

@@ -1,11 +1,14 @@
 import LoginPage from '../pages/LoginPage';
 import AdminBooksPage from '../pages/AdminBooksPage';
-import { DEFAULT_ADMIN_EMAIL, DEFAULT_ADMIN_PASSWORD, ADMIN_BOOKS_URL } from '../config/constants';
+import {
+  DEFAULT_ADMIN_EMAIL,
+  DEFAULT_ADMIN_PASSWORD,
+  ADMIN_BOOKS_URL,
+  INVALID_CREDENTIALS,
+} from '../config/constants';
 
 /**
  * Realiza login com credenciais de administrador
- * @param {string} email - Email do administrador
- * @param {string} password - Senha do administrador
  */
 export const loginAsAdmin = (
   email = DEFAULT_ADMIN_EMAIL,
@@ -13,6 +16,21 @@ export const loginAsAdmin = (
 ) => {
   LoginPage.navigate();
   LoginPage.login(email, password);
+};
+
+/**
+ * Tenta login sem validar sucesso (útil para cenários negativos)
+ */
+export const attemptLogin = (email, password) => {
+  LoginPage.navigate();
+  LoginPage.attemptLogin(email, password);
+};
+
+/**
+ * Tenta login com credenciais inválidas
+ */
+export const attemptInvalidLogin = () => {
+  attemptLogin(INVALID_CREDENTIALS.email, INVALID_CREDENTIALS.password);
 };
 
 /**
@@ -25,8 +43,6 @@ export const logout = () => {
 
 /**
  * Realiza login e navega para a página de administrador de livros
- * @param {string} email - Email do administrador
- * @param {string} password - Senha do administrador
  */
 export const loginAndNavigateToBooks = (
   email = DEFAULT_ADMIN_EMAIL,
